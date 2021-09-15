@@ -18,6 +18,9 @@ def preprocess_sentence(text):
     text = ''.join([i for i in text if i not in string.punctuation])
     return word_tokenize(text.strip(), format='text').lower()
 
+questions = [preprocess_sentence(question) for question in questions]
+answers = [preprocess_sentence(answer) for answer in answers]
+
 tokenizer = tfds.deprecated.text.SubwordTextEncoder.build_from_corpus(
     questions + answers, target_vocab_size = 1000
 )
