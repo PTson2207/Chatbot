@@ -129,3 +129,28 @@ class PositionalEncoding(tf.keras.layers.Layer):
 
     def call(self, inputs, **kwargs):
         return inputs + self.pos_encoding[:, :tf.shape(inputs)[1], :]
+
+# Encode layers
+def encoder_layer(units, d_model, num_heads, dropout, name="encoder_layer"):
+    inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
+    padding_mask = tf.keras.Input(shape=(1, 1, None), name="padding_mask")
+
+    attention = MultiHeadAttention(
+        d_model, num_heads, name="attention")({
+        'query': inputs,
+        'key': inputs,
+        'value': inputs,
+        'mask': padding_mask
+    })
+    attention = tf.keras.layers.Dropout(rate=dropout)(attention)
+    add_attention = tf.keras.layers.add([inputs, attention])
+    attention = tf.keras.layers.LayerNormalization(epsilon=1e-6)(add_attention)
+
+    outputs = tf.keras.layers.Dense(units=units, activation='relu')(attention)
+    outputs = tf.keras.layers.Dense(units=d_model)(outputs)
+    outputs = tf.keras.layers.Dropout(rate=dropout)(outputs)
+    add_attention = tf.keras.layers.add([attention, outputs])
+    outputs = tf.keras.layers.LayerNormalization(epsilon=1e-6)(add_attention)
+
+    return tf.keras.Model(
+        inputs=[inputs, padding_mask], outputs=outputs, name=name)
