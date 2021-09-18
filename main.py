@@ -17,6 +17,9 @@ NUM_HEADS = 8
 UNITS = 256
 DROPOUT = 0.1
 EPOCHS = 50
+from model import transformer
+from evaluate import loss_function, accuracy, CustomSchedule, evaluate, predict
+
 
 # Load data
 df = pd.read_csv('data/qa_data.csv')
@@ -53,3 +56,42 @@ dataset = dataset.batch(BATCH_SIZE)
 dataset = dataset.prefetch(AUTO)
 
 # LoadModel
+tf.keras.backend.clear_session()
+
+learning_rate = CustomSchedule(D_MODEL)
+
+optimizer = tf.keras.optimizers.Adam(
+    learning_rate=learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9
+)
+
+try:
+    tpu = tf.distribute.cluster_resolver.TPUClusterResolver()
+    print('Running on TPU {}'.format(tpu.cluster_spec().as_dict()['worker']))
+except ValueError:
+    tpu = None
+if tpu:
+    tf.config.experimental_connect_to_cluster(tpu)
+    tf.tpu.experimental.initialize_tpu_system(tpu)
+    strategy = tf.distribute.experimental.TPUStrategy(tpu)
+else:
+    strategy = tf.distribute.get_strategy()
+
+with strategy.scope():
+    model = transformer(
+        vocab_size=VOCAB_SIZE,
+        num_layers=NUM_LAYERS,
+        units=UNITS,
+        d_model=D_MODEL,
+        num_heads=NUM_HEADS,
+        dropout=DROPOUT)
+    model.compile(optimizer=optimizer, loss=loss_function, metrics=[accuracy])
+
+#model.fit(dataset, epochs=500)
+model.load_weights('transformer_chatbot.h5')
+
+
+while (1):
+    question = input("Question: ")
+    if question == 'quit':
+        break
+    sentence = predict(question)
