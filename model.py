@@ -303,3 +303,7 @@ def transformer(vocab_size,
     outputs = tf.keras.layers.Dense(units=vocab_size, name="outputs")(dec_outputs)
 
     return tf.keras.Model(inputs=[inputs, dec_inputs], outputs=outputs, name=name)
+
+
+
+print(tf.__version__)

@@ -52,6 +52,6 @@ def tokenize_and_filter(inputs, outputs):
 
 questions, answers = tokenize_and_filter(questions, answers)
 
-print('Vocab size: {}'.format(VOCAB_SIZE))
-print('Number of Sample questions:{}'.format(len(questions)))
-print('Number of Sample answers: {}'.format(len(answers)))
+# print('Vocab size: {}'.format(VOCAB_SIZE))
+# print('Number of Sample questions:{}'.format(len(questions)))
+# print('Number of Sample answers: {}'.format(len(answers)))
