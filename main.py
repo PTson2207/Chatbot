@@ -12,8 +12,8 @@ from preprocessing import preprocess_sentence, tokenize_and_filter
 MAX_LENGTH = 80
 # For Transformer
 NUM_LAYERS = 3
-D_MODEL = 128
-NUM_HEADS = 4
+D_MODEL = 512
+NUM_HEADS = 8
 UNITS = 2
 DROPOUT = 0.1
 EPOCHS = 50
